@@ -1,25 +1,14 @@
 import { Injectable } from "@nestjs/common";
-import { prisma, slug } from "../shared";
+import { OrdersRepository } from "./orders.repository";
 
 @Injectable()
 export class OrdersService {
-  async createOrder() {
-    const product = await prisma.products.findFirstOrThrow({
-      where: {
-        slug,
-      },
-      select: {
-        id: true,
-        quantity: true,
-      },
-    });
-    return prisma.products.update({
-      where: {
-        slug,
-      },
-      data: {
-        quantity: product.quantity - 1,
-      },
-    });
+  constructor(private readonly repo: OrdersRepository) {}
+
+  async createOrder(type: string) {
+    switch (type) {
+      case "select-update":
+        return this.repo.selectAndUpdate();
+    }
   }
 }

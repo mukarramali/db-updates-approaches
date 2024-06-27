@@ -1,4 +1,4 @@
-import { Controller, Post } from "@nestjs/common";
+import { Controller, Post, Query } from "@nestjs/common";
 import { OrdersService } from "./orders.service";
 
 @Controller("orders")
@@ -6,7 +6,7 @@ export class OrdersController {
   constructor(private readonly appService: OrdersService) {}
 
   @Post()
-  order() {
-    return this.appService.createOrder();
+  order(@Query("type") type: string) {
+    return this.appService.createOrder(type || "select-update");
   }
 }
