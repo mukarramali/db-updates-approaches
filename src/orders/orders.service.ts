@@ -12,6 +12,10 @@ export class OrdersService {
         return this.repo.selectAndUpdate();
       case "increment":
         return this.repo.increment();
+      case "optimistic":
+        return this.repo.optimistic();
+      case "optimistic-retries":
+        return this.repo.optimisticRetries();
     }
   }
 }
