@@ -35,4 +35,18 @@ export class OrdersRepository {
       },
     });
   }
+
+  async updateStockAndOrder() {
+    await prisma.products.update({
+      where: {
+        slug,
+      },
+      data: {
+        quantity: {
+          decrement: 1,
+        },
+      },
+    });
+    await prisma.orders.create({});
+  }
 }

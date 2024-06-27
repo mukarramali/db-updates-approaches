@@ -1,6 +1,7 @@
 import { methods } from "../src/shared";
 
-const CONCURRENT_USERS = 100;
+const CONCURRENT_USERS = 2000;
+const CONCURRENCY_LATENCY = 1;
 const type: methods = "decrement";
 
 (async function () {
@@ -21,6 +22,6 @@ async function wait() {
   return new Promise((resolve, rejects) => {
     setTimeout(() => {
       resolve("");
-    }, Math.floor(Math.random() * 1000));
+    }, Math.floor(Math.random() * CONCURRENCY_LATENCY));
   });
 }
