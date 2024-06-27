@@ -6,7 +6,7 @@ export class OrdersController {
   constructor(private readonly appService: OrdersService) {}
 
   @Post()
-  order(): string {
+  order() {
     return this.appService.createOrder();
   }
 }
