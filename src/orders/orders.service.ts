@@ -8,14 +8,16 @@ export class OrdersService {
 
   async createOrder(type: methods) {
     switch (type) {
-      case "select-update":
+      case "selectAndUpdate":
         return this.repo.selectAndUpdate();
       case "increment":
         return this.repo.increment();
       case "optimistic":
         return this.repo.optimistic();
-      case "optimistic-retries":
+      case "optimisticRetries":
         return this.repo.optimisticRetries();
+      case "updateWithLocking":
+        return this.repo.updateWithLocking();
     }
   }
 }

@@ -24,7 +24,7 @@ export class OrdersRepository {
   }
 
   /**
-   * Non blocking,
+   * Non blocking, concurrency can compromise
    */
   async increment() {
     return prisma.products.update({
@@ -40,7 +40,10 @@ export class OrdersRepository {
   }
 
   /**
-   * Non blocking, high concurrency, handle conflict gracefully
+   * Pro: Non blocking, high concurrency, handle conflict gracefully
+   * Con: Conflict handling makes it complex
+   * Remark: Should only be used in low concurrent writes
+   * Example: Collaborating on google docs
    */
   async optimistic() {
     const product = await prisma.products.findUnique({
@@ -81,5 +84,31 @@ export class OrdersRepository {
         await sleep(delay);
       }
     }
+  }
+
+  async updateWithLocking() {
+    return prisma.$transaction(async (tx) => {
+      const product = await tx.$queryRaw`
+        SELECT * FROM products
+        WHERE slug = ${slug}
+        FOR UPDATE
+      `;
+
+      return tx.products.update({
+        where: {
+          slug,
+        },
+        data: {
+          sold: product[0].sold + 1,
+        },
+      });
+    });
+  }
+
+  /**
+   * Non blocking, high concurrency
+   */
+  async updateInJob() {
+    // sendToQueue({ type: 'incrementSold', slug });
   }
 }

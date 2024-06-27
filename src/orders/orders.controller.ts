@@ -8,6 +8,6 @@ export class OrdersController {
 
   @Post()
   order(@Query("type") type: methods) {
-    return this.appService.createOrder(type || "select-update");
+    return this.appService.createOrder(type || "selectAndUpdate");
   }
 }
