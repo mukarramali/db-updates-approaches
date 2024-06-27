@@ -22,4 +22,17 @@ export class OrdersRepository {
       },
     });
   }
+
+  async decrement() {
+    return prisma.products.update({
+      where: {
+        slug,
+      },
+      data: {
+        quantity: {
+          decrement: 1,
+        },
+      },
+    });
+  }
 }
