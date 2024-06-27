@@ -1,8 +1,8 @@
 import { methods } from "../src/shared";
 
-const CONCURRENT_USERS = 2000;
+const CONCURRENT_USERS = 1000;
 const CONCURRENCY_LATENCY = 1;
-const type: methods = "decrement";
+const type: methods = "increment";
 
 (async function () {
   const API = `http://localhost:3000/orders?type=${type}`;

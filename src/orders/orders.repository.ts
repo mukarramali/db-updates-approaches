@@ -10,7 +10,7 @@ export class OrdersRepository {
       },
       select: {
         id: true,
-        quantity: true,
+        sold: true,
       },
     });
     return prisma.products.update({
@@ -18,19 +18,19 @@ export class OrdersRepository {
         slug,
       },
       data: {
-        quantity: product.quantity - 1,
+        sold: product.sold + 1,
       },
     });
   }
 
-  async decrement() {
+  async increment() {
     return prisma.products.update({
       where: {
         slug,
       },
       data: {
-        quantity: {
-          decrement: 1,
+        sold: {
+          increment: 1,
         },
       },
     });
@@ -42,7 +42,7 @@ export class OrdersRepository {
         slug,
       },
       data: {
-        quantity: {
+        sold: {
           decrement: 1,
         },
       },

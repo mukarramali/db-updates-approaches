@@ -10,8 +10,8 @@ export class OrdersService {
     switch (type) {
       case "select-update":
         return this.repo.selectAndUpdate();
-      case "decrement":
-        return this.repo.decrement();
+      case "increment":
+        return this.repo.increment();
     }
   }
 }
