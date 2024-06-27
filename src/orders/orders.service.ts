@@ -18,7 +18,7 @@ export class OrdersService {
         slug,
       },
       data: {
-        quantity: product.quantity + 2,
+        quantity: product.quantity - 1,
       },
     });
   }
