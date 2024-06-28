@@ -140,6 +140,25 @@ export class OrdersRepository {
       await tx.orders.create({
         data: {},
       });
+    });
+  }
+
+  async externalCallsWithTransaction() {
+    await prisma.$transaction(async (tx) => {
+      await tx.products.update({
+        where: {
+          slug,
+        },
+        data: {
+          stock: {
+            decrement: 1,
+          },
+        },
+      });
+
+      await tx.orders.create({
+        data: {},
+      });
 
       await this.sendEmail();
     });
@@ -158,6 +177,9 @@ export class OrdersRepository {
         "Could not send email",
         HttpStatus.GATEWAY_TIMEOUT,
       );
+    } else {
+      const delay = Math.floor(Math.random() * 300);
+      await sleep(delay);
     }
   }
 }

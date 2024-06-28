@@ -8,7 +8,7 @@
   "scripts": {
     "start": "nest start --watch",
     "test": "ts-node ./runners/index.ts",
-    "clean": "ts-node ./runners/clean.ts"
+    "pretest": "ts-node ./runners/clean.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

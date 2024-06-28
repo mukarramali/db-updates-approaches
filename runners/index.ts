@@ -1,9 +1,9 @@
 import { methods } from "../src/shared";
 import { sleep } from "../src/shared/utils";
 
-const CONCURRENT_USERS = 1000;
-const CONCURRENCY_MAX_LATENCY = 1; // ms
-const type: methods = "failureStepsWithTransaction";
+const CONCURRENT_USERS = 5000;
+const CONCURRENCY_MAX_LATENCY = 10; // ms
+const type: methods = "externalCallsWithTransaction";
 
 (async function () {
   const API = `http://localhost:3000/orders?type=${type}`;
@@ -11,7 +11,7 @@ const type: methods = "failureStepsWithTransaction";
     Array(CONCURRENT_USERS)
       .fill(undefined)
       .map(async () => {
-        await wait();
+        await sleep(Math.random() * CONCURRENCY_MAX_LATENCY);
         const response = await fetch(API, {
           method: "POST",
         });
