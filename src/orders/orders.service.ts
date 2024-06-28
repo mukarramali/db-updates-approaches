@@ -10,14 +10,16 @@ export class OrdersService {
     switch (type) {
       case "selectAndUpdate":
         return this.repo.selectAndUpdate();
-      case "increment":
-        return this.repo.increment();
+      case "decrement":
+        return this.repo.decrement();
       case "optimistic":
         return this.repo.optimistic();
       case "optimisticRetries":
         return this.repo.optimisticRetries();
       case "updateWithLocking":
         return this.repo.updateWithLocking();
+      case "failureStepsWithoutTransaction":
+        return this.repo.failureStepsWithoutTransaction();
     }
   }
 }

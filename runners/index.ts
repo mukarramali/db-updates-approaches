@@ -1,8 +1,8 @@
 import { methods } from "../src/shared";
 
-const CONCURRENT_USERS = 1000;
+const CONCURRENT_USERS = 10;
 const CONCURRENCY_MAX_LATENCY = 10;
-const type: methods = "updateWithLocking";
+const type: methods = "failureStepsWithoutTransaction";
 
 (async function () {
   const API = `http://localhost:3000/orders?type=${type}`;

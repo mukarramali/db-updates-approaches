@@ -2,7 +2,8 @@ export const slug = "bike";
 
 export type methods =
   | "selectAndUpdate"
-  | "increment"
+  | "decrement"
   | "optimistic"
   | "optimisticRetries"
-  | "updateWithLocking";
+  | "updateWithLocking"
+  | "failureStepsWithoutTransaction";

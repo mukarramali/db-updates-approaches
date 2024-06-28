@@ -7,7 +7,7 @@ export class OrdersController {
   constructor(private readonly appService: OrdersService) {}
 
   @Post()
-  order(@Query("type") type: methods) {
-    return this.appService.createOrder(type || "selectAndUpdate");
+  async order(@Query("type") type: methods) {
+    return await this.appService.createOrder(type || "selectAndUpdate");
   }
 }

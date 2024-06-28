@@ -10,7 +10,7 @@ datasource db {
 model products {
   id      String @id @default(uuid()) @db.Uuid
   slug    String @unique
-  sold    Int    @default(0)
+  stock   Int    @default(0)
   version Int    @default(0)
 }
 

@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { prisma, slug } from "../shared";
-import { sleep } from "../shared/utils";
+import { failRandomly, sleep } from "../shared/utils";
 
 @Injectable()
 export class OrdersRepository {
@@ -10,7 +10,7 @@ export class OrdersRepository {
         slug,
       },
       select: {
-        sold: true,
+        stock: true,
       },
     });
     return prisma.products.update({
@@ -18,7 +18,7 @@ export class OrdersRepository {
         slug,
       },
       data: {
-        sold: product.sold + 1,
+        stock: product.stock - 1,
       },
     });
   }
@@ -26,14 +26,14 @@ export class OrdersRepository {
   /**
    * Non blocking, concurrency can compromise
    */
-  async increment() {
+  async decrement() {
     return prisma.products.update({
       where: {
         slug,
       },
       data: {
-        sold: {
-          increment: 1,
+        stock: {
+          decrement: 1,
         },
       },
     });
@@ -51,7 +51,7 @@ export class OrdersRepository {
         slug,
       },
       select: {
-        sold: true,
+        stock: true,
         version: true,
       },
     });
@@ -61,11 +61,11 @@ export class OrdersRepository {
         version: product.version,
       },
       data: {
-        sold: {
-          increment: 1,
+        stock: {
+          decrement: 1,
         },
         version: {
-          increment: 1,
+          decrement: 1,
         },
       },
     });
@@ -99,16 +99,44 @@ export class OrdersRepository {
           slug,
         },
         data: {
-          sold: product[0].sold + 1,
+          stock: product[0].stock - 1,
         },
       });
     });
+  }
+
+  async failureStepsWithoutTransaction() {
+    await prisma.products.update({
+      where: {
+        slug,
+      },
+      data: {
+        stock: {
+          decrement: 1,
+        },
+      },
+    });
+
+    await prisma.orders.create({
+      data: {},
+    });
+
+    await this.sendEmail();
   }
 
   /**
    * Non blocking, high concurrency
    */
   async updateInJob() {
-    // sendToQueue({ type: 'incrementSold', slug });
+    // sendToQueue({ type: 'decrementstock', slug });
+  }
+
+  async sendEmail() {
+    if (failRandomly()) {
+      throw new HttpException(
+        "Could not send email",
+        HttpStatus.GATEWAY_TIMEOUT,
+      );
+    }
   }
 }
