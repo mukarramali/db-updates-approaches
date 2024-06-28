@@ -124,6 +124,27 @@ export class OrdersRepository {
     await this.sendEmail();
   }
 
+  async failureStepsWithTransaction() {
+    await prisma.$transaction(async (tx) => {
+      await tx.products.update({
+        where: {
+          slug,
+        },
+        data: {
+          stock: {
+            decrement: 1,
+          },
+        },
+      });
+
+      await tx.orders.create({
+        data: {},
+      });
+
+      await this.sendEmail();
+    });
+  }
+
   /**
    * Non blocking, high concurrency
    */

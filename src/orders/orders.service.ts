@@ -20,6 +20,8 @@ export class OrdersService {
         return this.repo.updateWithLocking();
       case "failureStepsWithoutTransaction":
         return this.repo.failureStepsWithoutTransaction();
+      case "failureStepsWithTransaction":
+        return this.repo.failureStepsWithTransaction();
     }
   }
 }
