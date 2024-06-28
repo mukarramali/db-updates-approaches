@@ -1,4 +1,5 @@
 import { methods } from "../src/shared";
+import { sleep } from "../src/shared/utils";
 
 const CONCURRENT_USERS = 1000;
 const CONCURRENCY_MAX_LATENCY = 1; // ms
@@ -25,11 +26,3 @@ const type: methods = "failureStepsWithTransaction";
     rejected: requests.filter((r) => r.status === "rejected").length,
   });
 })();
-
-async function wait() {
-  return new Promise((resolve, rejects) => {
-    setTimeout(() => {
-      resolve("");
-    }, Math.floor(Math.random() * CONCURRENCY_MAX_LATENCY));
-  });
-}
