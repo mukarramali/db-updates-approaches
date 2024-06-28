@@ -1,8 +1,8 @@
 import { methods } from "../src/shared";
 
-const CONCURRENT_USERS = 10;
-const CONCURRENCY_MAX_LATENCY = 10;
-const type: methods = "failureStepsWithoutTransaction";
+const CONCURRENT_USERS = 1000;
+const CONCURRENCY_MAX_LATENCY = 10; // ms
+const type: methods = "optimistic";
 
 (async function () {
   const API = `http://localhost:3000/orders?type=${type}`;
@@ -11,9 +11,12 @@ const type: methods = "failureStepsWithoutTransaction";
       .fill(undefined)
       .map(async () => {
         await wait();
-        return fetch(API, {
+        const response = await fetch(API, {
           method: "POST",
         });
+        if (response.status >= 400) {
+          throw new Error();
+        }
       }),
   );
   console.log(`${CONCURRENT_USERS} requests made with ${type} approach:`);
