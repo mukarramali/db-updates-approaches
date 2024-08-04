@@ -1,8 +1,5 @@
 package main
 
-import "transactions/api/products"
+func test() {
 
-func main() {
-	repo := products.ProductsRepo{}
-	repo.SelectAndUpdate()
 }

@@ -29,8 +29,6 @@ func init() {
 }
 
 func (order *ProductsRepo) SelectAndUpdate() error {
-	defer cleanup()
-
 	stockRes, err := client.Products.
 		FindFirst(db.Products.Slug.Equals(TestProductSlug)).
 		Select(db.Products.Stock.Field()).

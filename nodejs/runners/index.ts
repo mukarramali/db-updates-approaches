@@ -6,7 +6,7 @@ const CONCURRENCY_MAX_LATENCY = 10; // ms
 const type: methods = "externalCallsWithTransaction";
 
 (async function () {
-  const API = `http://localhost:3000/orders?type=${type}`;
+  const API = `http://localhost:8080?type=${type}`;
   const requests = await Promise.allSettled(
     Array(CONCURRENT_USERS)
       .fill(undefined)
