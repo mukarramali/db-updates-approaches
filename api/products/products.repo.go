@@ -1,42 +1,47 @@
 package products
 
 import (
-	"fmt"
-	"transactions/api/db"
-
-	sq "github.com/Masterminds/squirrel"
+	"context"
+	"transactions/db"
 )
-
-type Products struct {
-	id      string
-	stock   uint8
-	slug    string
-	version uint8
-}
 
 type ProductsRepo struct {
 }
 
 const TestProductSlug = "bike"
 
+var client *db.PrismaClient
+var ctx context.Context
+
+func cleanup() {
+	ctx.Done()
+	if err := client.Prisma.Disconnect(); err != nil {
+		panic(err)
+	}
+}
+
+func init() {
+	ctx = context.Background()
+	client = db.NewClient()
+	if err := client.Prisma.Connect(); err != nil {
+		panic(err)
+	}
+}
+
 func (order *ProductsRepo) SelectAndUpdate() error {
-	getStockQuery := sq.Select("stock").From("products").Where(sq.Eq{"slug": TestProductSlug}).Limit(1)
+	defer cleanup()
 
-	stockRes, err := getStockQuery.RunWith(db.DB()).Query()
+	stockRes, err := client.Products.
+		FindFirst(db.Products.Slug.Equals(TestProductSlug)).
+		Select(db.Products.Stock.Field()).
+		Exec(ctx)
 
-	queryStr, _, _ := getStockQuery.ToSql()
-	fmt.Println("Query:", queryStr)
-	fmt.Println("Res:", stockRes)
-	fmt.Println("Err:", err)
+	if err != nil {
+		return err
+	}
 
-	rawQ, err := db.DB().Query("SELECT stock FROM products WHERE slug = $1", TestProductSlug)
-
-	fmt.Println("rawQ:", rawQ)
-	fmt.Println("Err:", err)
-
-	// updateStatement := sq.Update("products").Set("stock", stockRes).Where(sq.Eq{"slug": TestProductSlug})
-
-	// stockRes, err := getStockQuery.RunWith(db.DB()).Query()
+	_, err = client.Products.
+		UpsertOne(db.Products.Slug.Equals(TestProductSlug)).Update(db.Products.Stock.Set(stockRes.Stock - 1)).Exec(ctx)
 
 	return err
 }

@@ -1,0 +1,20 @@
+generator db {
+  provider = "go run github.com/steebchen/prisma-client-go"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model products {
+  id      String @id @default(uuid()) @db.Uuid
+  slug    String @unique
+  stock   Int    @default(0)
+  version Int    @default(0)
+}
+
+model orders {
+  id       String   @id @default(uuid()) @db.Uuid
+  createAt DateTime @default(now()) @map("created_at") @db.Timestamp()
+}
