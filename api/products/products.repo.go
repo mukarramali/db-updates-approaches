@@ -1,8 +1,9 @@
 package products
 
 import (
-	"context"
-	"transactions/db"
+	connections "transactions/connections/db"
+
+	"gorm.io/gorm"
 )
 
 type ProductsRepo struct {
@@ -10,38 +11,28 @@ type ProductsRepo struct {
 
 const TestProductSlug = "bike"
 
-var client *db.PrismaClient
-var ctx context.Context
-
-func Cleanup() {
-	ctx.Done()
-	if err := client.Prisma.Disconnect(); err != nil {
-		panic(err)
-	}
+func (pr *ProductsRepo) WhereSlug(slug string) *gorm.DB {
+	client := connections.DBClient()
+	return client.Table("products").
+		Where("slug = ?", slug)
 }
 
-func init() {
-	ctx = context.Background()
-	client = db.NewClient()
-	if err := client.Prisma.Connect(); err != nil {
-		panic(err)
-	}
-}
+func (pr *ProductsRepo) SelectAndUpdate() (*Product, error) {
+	var product *Product = &Product{Slug: "bike"}
 
-func (order *ProductsRepo) SelectAndUpdate() error {
-	stockRes, err := client.Products.
-		FindFirst(db.Products.Slug.Equals(TestProductSlug)).
-		Select(db.Products.Stock.Field()).
-		Exec(ctx)
+	result := pr.WhereSlug(TestProductSlug).
+		Select("stock").
+		First(&product)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	err := pr.WhereSlug(TestProductSlug).Update("stock", product.Stock-1).Error
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = client.Products.
-		UpsertOne(db.Products.Slug.Equals(TestProductSlug)).
-		Update(db.Products.Stock.Set(stockRes.Stock - 1)).
-		Exec(ctx)
-
-	return err
+	return product, nil
 }

@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	CONCURRENT_USERS        = 5
+	CONCURRENT_USERS        = 500
 	CONCURRENCY_MAX_LATENCY = 10 * time.Millisecond
-	apiURL                  = "http://localhost:8080?type=externalCallsWithTransaction"
+	strategy                = "SelectAndUpdate"
+	apiURL                  = "http://localhost:8080?type=%s"
 )
 
 func sleepRandomLatency() {
@@ -22,7 +23,7 @@ func makeRequest(wg *sync.WaitGroup, successCount, rejectCount *int) {
 	defer wg.Done()
 	sleepRandomLatency()
 
-	resp, err := http.Post(apiURL, "application/json", nil)
+	resp, err := http.Post(fmt.Sprintf(apiURL, strategy), "application/json", nil)
 	if err != nil || resp.StatusCode >= 400 {
 		*rejectCount++
 		return
@@ -42,6 +43,6 @@ func main() {
 
 	wg.Wait()
 
-	fmt.Printf("%d requests made with externalCallsWithTransaction approach:\n", CONCURRENT_USERS)
+	fmt.Printf("%d requests made with %s approach:\n", CONCURRENT_USERS, strategy)
 	fmt.Printf("Success: %d, Rejected: %d\n", successCount, rejectCount)
 }
