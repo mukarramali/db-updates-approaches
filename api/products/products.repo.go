@@ -13,7 +13,7 @@ const TestProductSlug = "bike"
 var client *db.PrismaClient
 var ctx context.Context
 
-func cleanup() {
+func Cleanup() {
 	ctx.Done()
 	if err := client.Prisma.Disconnect(); err != nil {
 		panic(err)
@@ -39,7 +39,9 @@ func (order *ProductsRepo) SelectAndUpdate() error {
 	}
 
 	_, err = client.Products.
-		UpsertOne(db.Products.Slug.Equals(TestProductSlug)).Update(db.Products.Stock.Set(stockRes.Stock - 1)).Exec(ctx)
+		UpsertOne(db.Products.Slug.Equals(TestProductSlug)).
+		Update(db.Products.Stock.Set(stockRes.Stock - 1)).
+		Exec(ctx)
 
 	return err
 }
