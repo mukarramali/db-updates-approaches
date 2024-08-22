@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	CONCURRENT_USERS        = 2
+	CONCURRENT_USERS        = 100
 	CONCURRENCY_MAX_LATENCY = 10 * time.Millisecond
 	strategy                = "SelectAndUpdate"
 	apiURL                  = "http://localhost:8080?type=%s"

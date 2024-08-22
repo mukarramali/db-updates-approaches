@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"transactions/api/products"
 )
@@ -12,7 +13,10 @@ func init() {
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
-	productRepo.SelectAndUpdate()
+	_, error := productRepo.SelectAndUpdate()
+	if error != nil {
+		fmt.Println(error)
+	}
 }
 
 func main() {

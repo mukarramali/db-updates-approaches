@@ -14,7 +14,10 @@ var client *gorm.DB
 var pool *gorm.ConnPool
 
 func initializeDBClient() {
-	_client, err := gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: logger.Default, PrepareStmt: false})
+	_client, err := gorm.Open(postgres.New(postgres.Config{
+		DSN:                  dsn,
+		PreferSimpleProtocol: true,
+	}), &gorm.Config{Logger: logger.Default.LogMode(logger.Error), PrepareStmt: false})
 	if err != nil {
 		panic(err)
 	}
