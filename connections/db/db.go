@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var dsn string = "host=localhost user=postgres password=postgres dbname=transactions port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+var dsn string = "host=localhost user=postgres password=postgres dbname=transactions port=6432 sslmode=disable TimeZone=Asia/Shanghai"
 
 var client *gorm.DB
 var pool *gorm.ConnPool

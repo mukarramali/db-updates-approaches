@@ -10,3 +10,14 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=transactions
       - POSTGRES_MAX_CONNECTIONS=500
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    ports:
+      - "6432:6432"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/transactions
+    volumes:
+      - ./pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini
+      - ./userlist.txt:/etc/pgbouncer/userlist.txt
+    depends_on:
+      - db
