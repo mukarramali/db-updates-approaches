@@ -1,7 +1,8 @@
-package connections
+package db
 
 import (
 	"time"
+	"transactions/connections/db/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -11,10 +12,9 @@ import (
 var dsn string = "host=localhost user=postgres password=postgres dbname=transactions port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 
 var client *gorm.DB
-var pool *gorm.ConnPool
 
 func initializeDBClient() {
-	_client, err := gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: logger.Default})
+	_client, err := gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: logger.Default, PrepareStmt: false})
 	if err != nil {
 		panic(err)
 	}
@@ -22,6 +22,9 @@ func initializeDBClient() {
 	db.SetMaxIdleConns(20)
 	db.SetMaxOpenConns(500)
 	db.SetConnMaxLifetime(time.Hour)
+
+	// AutoMigrate will create the tables for the models
+	_client.AutoMigrate(&models.Product{})
 
 	client = _client
 }
