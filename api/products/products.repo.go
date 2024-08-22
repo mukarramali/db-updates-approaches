@@ -1,7 +1,8 @@
 package products
 
 import (
-	connections "transactions/connections/db"
+	"transactions/connections/db"
+	"transactions/connections/db/models"
 
 	"gorm.io/gorm"
 )
@@ -12,13 +13,22 @@ type ProductsRepo struct {
 const TestProductSlug = "bike"
 
 func (pr *ProductsRepo) WhereSlug(slug string) *gorm.DB {
-	client := connections.DBClient()
+	client := db.DBClient()
 	return client.Table("products").
 		Where("slug = ?", slug)
 }
 
-func (pr *ProductsRepo) SelectAndUpdate() (*Product, error) {
-	var product *Product = &Product{Slug: "bike"}
+func (pr *ProductsRepo) Select(slug string) *models.Product {
+	var product *models.Product = &models.Product{Slug: "bike"}
+
+	pr.WhereSlug(TestProductSlug).
+		Select("stock").
+		First(&product)
+	return product
+}
+
+func (pr *ProductsRepo) SelectAndUpdate() (*models.Product, error) {
+	var product *models.Product = &models.Product{Slug: "bike"}
 
 	result := pr.WhereSlug(TestProductSlug).
 		Select("stock").
