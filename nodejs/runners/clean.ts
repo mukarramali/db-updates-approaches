@@ -1,19 +1,26 @@
+import { randomUUID } from "crypto";
 import { prisma, slug } from "../src/shared";
 
 (async function () {
   await prisma.orders.deleteMany({
     where: {
       id: {
-        not: "0434eb0a-e956-4f8d-95c6-fe9a6362836a",
+        not: randomUUID(),
       },
     },
   });
-  await prisma.products.update({
+  await prisma.products.upsert({
     where: {
       slug,
     },
-    data: {
+    create: {
+      slug,
       stock: 10000,
+      version: 0,
+    },
+    update: {
+      stock: 10000,
+      version: 0,
     },
   });
 })();

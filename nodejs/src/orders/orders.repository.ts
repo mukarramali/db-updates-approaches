@@ -1,6 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { prisma, slug } from "../shared";
-import { failRandomly, sleep } from "../shared/utils";
+import { sendEmail } from "../shared/long-running-tasks";
+import { queue } from "../shared/queue";
+import { sleep } from "../shared/utils";
 
 @Injectable()
 export class OrdersRepository {
@@ -24,7 +26,32 @@ export class OrdersRepository {
   }
 
   /**
-   * Non blocking, concurrency can compromise
+   * Single object, two queries
+   */
+  async selectAndUpdateInTransaction() {
+    return prisma.$transaction(async (tx) => {
+      const product = await tx.products.findUnique({
+        where: {
+          slug,
+        },
+        select: {
+          stock: true,
+        },
+      });
+      return tx.products.update({
+        where: {
+          slug,
+        },
+        data: {
+          stock: product.stock - 1,
+        },
+      });
+    });
+  }
+
+  /**
+   * Non blocking, high concurrency
+   * DB take cares of isolation
    */
   async decrement() {
     return prisma.products.update({
@@ -65,7 +92,7 @@ export class OrdersRepository {
           decrement: 1,
         },
         version: {
-          decrement: 1,
+          increment: 1,
         },
       },
     });
@@ -86,6 +113,9 @@ export class OrdersRepository {
     }
   }
 
+  /**
+   * Single object, blocking, high concurrency
+   */
   async updateWithLocking() {
     return prisma.$transaction(async (tx) => {
       const product = await tx.$queryRaw`
@@ -105,6 +135,11 @@ export class OrdersRepository {
     });
   }
 
+  /**
+   * Multiple objects and external dependencies
+   * Non Blocking, high concurrency
+   * Non consistent
+   */
   async failureStepsWithoutTransaction() {
     await prisma.products.update({
       where: {
@@ -117,13 +152,18 @@ export class OrdersRepository {
       },
     });
 
+    await sendEmail();
+
     await prisma.orders.create({
       data: {},
     });
-
-    await this.sendEmail();
   }
 
+  /**
+   * Multiple objects and external dependencies
+   * Blocking, low concurrency
+   * Consistent
+   */
   async failureStepsWithTransaction() {
     await prisma.$transaction(async (tx) => {
       await tx.products.update({
@@ -137,15 +177,22 @@ export class OrdersRepository {
         },
       });
 
+      await sendEmail();
+
       await tx.orders.create({
         data: {},
       });
     });
   }
 
-  async externalCallsWithTransaction() {
-    await prisma.$transaction(async (tx) => {
-      await tx.products.update({
+  /**
+   * Multiple objects and external dependencies
+   * Non Blocking, high concurrency
+   * Eventual Consistent
+   */
+  async updateInJob() {
+    queue.addTask(async () => {
+      await prisma.products.update({
         where: {
           slug,
         },
@@ -156,30 +203,11 @@ export class OrdersRepository {
         },
       });
 
-      await tx.orders.create({
+      await sendEmail();
+
+      await prisma.orders.create({
         data: {},
       });
-
-      await this.sendEmail();
     });
-  }
-
-  /**
-   * Non blocking, high concurrency
-   */
-  async updateInJob() {
-    // sendToQueue({ type: 'decrementstock', slug });
-  }
-
-  async sendEmail() {
-    if (failRandomly()) {
-      throw new HttpException(
-        "Could not send email",
-        HttpStatus.GATEWAY_TIMEOUT,
-      );
-    } else {
-      const delay = Math.floor(Math.random() * 300);
-      await sleep(delay);
-    }
   }
 }

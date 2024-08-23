@@ -4,7 +4,6 @@ import { OrdersService } from "./orders.service";
 
 @Controller("orders")
 export class OrdersController {
-  private errorTypes = new Set();
   constructor(private readonly appService: OrdersService) {}
 
   @Post()
