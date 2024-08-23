@@ -65,7 +65,7 @@ export class OrdersRepository {
           decrement: 1,
         },
         version: {
-          decrement: 1,
+          increment: 1,
         },
       },
     });
