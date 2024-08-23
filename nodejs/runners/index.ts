@@ -1,9 +1,9 @@
 import { methods } from "../src/shared";
 import { sleep } from "../src/shared/utils";
 
-const CONCURRENT_USERS = 500;
+const CONCURRENT_USERS = 200;
 const CONCURRENCY_MAX_LATENCY = 10; // ms
-const type: methods = "externalCallsWithTransaction";
+const type: methods = "failureStepsWithTransaction";
 
 (async function () {
   const API = `http://localhost:3000/orders?type=${type}`;
