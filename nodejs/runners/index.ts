@@ -1,7 +1,7 @@
 import { methods } from "../src/shared";
 import { sleep } from "../src/shared/utils";
 
-const CONCURRENT_USERS = 5000;
+const CONCURRENT_USERS = 500;
 const CONCURRENCY_MAX_LATENCY = 10; // ms
 const type: methods = "externalCallsWithTransaction";
 
@@ -12,10 +12,17 @@ const type: methods = "externalCallsWithTransaction";
       .fill(undefined)
       .map(async () => {
         await sleep(Math.random() * CONCURRENCY_MAX_LATENCY);
-        const response = await fetch(API, {
-          method: "POST",
-        });
-        if (response.status >= 400) {
+        let response: Response;
+        try {
+          response = await fetch(API, {
+            method: "POST",
+          });
+        } catch (error) {
+          countRejection("API error");
+          throw error;
+        }
+        if (response?.status >= 400) {
+          countRejection(response.status);
           throw new Error();
         }
       }),
@@ -24,5 +31,15 @@ const type: methods = "externalCallsWithTransaction";
   console.log({
     success: requests.filter((r) => r.status === "fulfilled").length,
     rejected: requests.filter((r) => r.status === "rejected").length,
+    rejections,
   });
 })();
+
+const rejections: Record<string | number, number> = {};
+function countRejection(key: number | string) {
+  if (rejections[key] !== undefined) {
+    rejections[key]++;
+  } else {
+    rejections[key] = 0;
+  }
+}
