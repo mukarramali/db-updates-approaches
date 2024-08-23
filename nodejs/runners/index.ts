@@ -1,7 +1,7 @@
 import { methods } from "../src/shared";
 import { sleep } from "../src/shared/utils";
 
-const CONCURRENT_USERS = 200;
+const CONCURRENT_USERS = 1000;
 const CONCURRENCY_MAX_LATENCY = 10; // ms
 const type: methods = "failureStepsWithTransaction";
 
