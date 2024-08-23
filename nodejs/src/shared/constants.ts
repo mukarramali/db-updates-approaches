@@ -7,5 +7,4 @@ export type methods =
   | "optimisticRetries"
   | "updateWithLocking"
   | "failureStepsWithoutTransaction"
-  | "failureStepsWithTransaction"
-  | "externalCallsWithTransaction";
+  | "failureStepsWithTransaction";

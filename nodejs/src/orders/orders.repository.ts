@@ -117,11 +117,11 @@ export class OrdersRepository {
       },
     });
 
+    await this.sendEmail();
+
     await prisma.orders.create({
       data: {},
     });
-
-    await this.sendEmail();
   }
 
   async failureStepsWithTransaction() {
@@ -137,30 +137,11 @@ export class OrdersRepository {
         },
       });
 
-      await tx.orders.create({
-        data: {},
-      });
-    });
-  }
-
-  async externalCallsWithTransaction() {
-    await prisma.$transaction(async (tx) => {
-      await tx.products.update({
-        where: {
-          slug,
-        },
-        data: {
-          stock: {
-            decrement: 1,
-          },
-        },
-      });
-
-      await tx.orders.create({
-        data: {},
-      });
-
       await this.sendEmail();
+
+      await tx.orders.create({
+        data: {},
+      });
     });
   }
 

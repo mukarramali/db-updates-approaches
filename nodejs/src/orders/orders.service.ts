@@ -22,8 +22,6 @@ export class OrdersService {
         return this.repo.failureStepsWithoutTransaction();
       case "failureStepsWithTransaction":
         return this.repo.failureStepsWithTransaction();
-      case "externalCallsWithTransaction":
-        return this.repo.externalCallsWithTransaction();
     }
   }
 }
