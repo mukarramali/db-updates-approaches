@@ -3,7 +3,7 @@ import { sleep } from "../src/shared/utils";
 
 const CONCURRENT_USERS = 500;
 const CONCURRENCY_MAX_LATENCY = 1; // ms
-const type: methods = "failureStepsWithTransaction";
+const type: methods = "updateInJob";
 
 (async function () {
   const API = `http://localhost:3000/orders?type=${type}`;

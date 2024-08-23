@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { prisma, slug } from "../shared";
 import { failRandomly, sleep } from "../shared/utils";
+import { queue } from "./queue";
 
 @Injectable()
 export class OrdersRepository {
@@ -149,7 +150,24 @@ export class OrdersRepository {
    * Non blocking, high concurrency
    */
   async updateInJob() {
-    // sendToQueue({ type: 'decrementstock', slug });
+    queue.addTask(async () => {
+      await prisma.products.update({
+        where: {
+          slug,
+        },
+        data: {
+          stock: {
+            decrement: 1,
+          },
+        },
+      });
+
+      await this.sendEmail();
+
+      await prisma.orders.create({
+        data: {},
+      });
+    });
   }
 
   async sendEmail() {
