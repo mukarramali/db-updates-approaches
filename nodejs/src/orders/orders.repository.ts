@@ -1,7 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { prisma, slug } from "../shared";
-import { failRandomly, sleep } from "../shared/utils";
-import { queue } from "./queue";
+import { sendEmail } from "../shared/long-running-tasks";
+import { queue } from "../shared/queue";
+import { sleep } from "../shared/utils";
 
 @Injectable()
 export class OrdersRepository {
@@ -118,7 +119,7 @@ export class OrdersRepository {
       },
     });
 
-    await this.sendEmail();
+    await sendEmail();
 
     await prisma.orders.create({
       data: {},
@@ -138,7 +139,7 @@ export class OrdersRepository {
         },
       });
 
-      await this.sendEmail();
+      await sendEmail();
 
       await tx.orders.create({
         data: {},
@@ -162,23 +163,11 @@ export class OrdersRepository {
         },
       });
 
-      await this.sendEmail();
+      await sendEmail();
 
       await prisma.orders.create({
         data: {},
       });
     });
-  }
-
-  async sendEmail() {
-    if (failRandomly()) {
-      throw new HttpException(
-        "Could not send email",
-        HttpStatus.GATEWAY_TIMEOUT,
-      );
-    } else {
-      const delay = Math.floor(Math.random() * 300);
-      await sleep(delay);
-    }
   }
 }
