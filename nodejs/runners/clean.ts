@@ -1,11 +1,16 @@
 import { prisma, slug } from "../src/shared";
 
 (async function () {
-  await prisma.products.update({
+  await prisma.products.upsert({
     where: {
       slug,
     },
-    data: {
+    create: {
+      slug,
+      stock: 10000,
+      version: 0,
+    },
+    update: {
       stock: 10000,
     },
   });
