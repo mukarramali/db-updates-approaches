@@ -26,7 +26,32 @@ export class OrdersRepository {
   }
 
   /**
-   * Non blocking, concurrency can compromise
+   * Single object, two queries
+   */
+  async selectAndUpdateInTransaction() {
+    return prisma.$transaction(async (tx) => {
+      const product = await tx.products.findUnique({
+        where: {
+          slug,
+        },
+        select: {
+          stock: true,
+        },
+      });
+      return tx.products.update({
+        where: {
+          slug,
+        },
+        data: {
+          stock: product.stock - 1,
+        },
+      });
+    });
+  }
+
+  /**
+   * Non blocking, high concurrency
+   * DB take cares of isolation
    */
   async decrement() {
     return prisma.products.update({
@@ -88,6 +113,9 @@ export class OrdersRepository {
     }
   }
 
+  /**
+   * Single object, blocking, high concurrency
+   */
   async updateWithLocking() {
     return prisma.$transaction(async (tx) => {
       const product = await tx.$queryRaw`
@@ -107,6 +135,11 @@ export class OrdersRepository {
     });
   }
 
+  /**
+   * Multiple objects and external dependencies
+   * Non Blocking, high concurrency
+   * Non consistent
+   */
   async failureStepsWithoutTransaction() {
     await prisma.products.update({
       where: {
@@ -126,6 +159,11 @@ export class OrdersRepository {
     });
   }
 
+  /**
+   * Multiple objects and external dependencies
+   * Blocking, low concurrency
+   * Consistent
+   */
   async failureStepsWithTransaction() {
     await prisma.$transaction(async (tx) => {
       await tx.products.update({
@@ -148,7 +186,9 @@ export class OrdersRepository {
   }
 
   /**
-   * Non blocking, high concurrency
+   * Multiple objects and external dependencies
+   * Non Blocking, high concurrency
+   * Eventual Consistent
    */
   async updateInJob() {
     queue.addTask(async () => {

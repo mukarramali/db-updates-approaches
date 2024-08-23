@@ -10,6 +10,8 @@ export class OrdersService {
     switch (type) {
       case "selectAndUpdate":
         return this.repo.selectAndUpdate();
+      case "selectAndUpdateInTransaction":
+        return this.repo.selectAndUpdateInTransaction();
       case "decrement":
         return this.repo.decrement();
       case "optimistic":
