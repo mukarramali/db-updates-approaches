@@ -19,16 +19,30 @@ func sleepRandomLatency() {
 	time.Sleep(time.Duration(rand.Intn(int(CONCURRENCY_MAX_LATENCY))))
 }
 
-func makeRequest(wg *sync.WaitGroup, successCount *int, failedRequests *map[int64]int64) {
+func makeRequest(wg *sync.WaitGroup, successCount *int, failedRequests map[int]int) {
 	defer wg.Done()
 	sleepRandomLatency()
 
-	resp, err := http.Post(fmt.Sprintf(apiURL, strategy), "application/json", nil)
-	if err != nil || resp.StatusCode >= 400 {
-		if failedRequests[resp.StatusCode] == nil {
-			failedRequests[resp.StatusCode]
+	t := http.DefaultTransport.(*http.Transport).Clone()
+	t.DisableKeepAlives = true
+	httpClient := &http.Client{
+		Transport: t,
+	}
+
+	resp, err := httpClient.Get(fmt.Sprintf(apiURL, strategy))
+	if err != nil {
+		statusCode := 0
+		if resp != nil {
+			statusCode = resp.StatusCode
 		}
-		*rejectCount++
+		if statusCode == 0 {
+			fmt.Println(err)
+		}
+		if count, exists := failedRequests[statusCode]; exists {
+			failedRequests[statusCode] = count + 1
+		} else {
+			failedRequests[statusCode] = 1
+		}
 		return
 	}
 	*successCount++
@@ -37,16 +51,15 @@ func makeRequest(wg *sync.WaitGroup, successCount *int, failedRequests *map[int6
 func main() {
 	var wg sync.WaitGroup
 	successCount := 0
-	rejectCount := 0
 	failedRequests := map[int]int{}
 	wg.Add(CONCURRENT_USERS)
 
 	for i := 0; i < CONCURRENT_USERS; i++ {
-		go makeRequest(&wg, &successCount, &failedRequests)
+		go makeRequest(&wg, &successCount, failedRequests)
 	}
 
 	wg.Wait()
 
 	fmt.Printf("%d requests made with %s approach:\n", CONCURRENT_USERS, strategy)
-	fmt.Printf("Success: %d, Rejected: %d\n", successCount, rejectCount)
+	fmt.Printf("Success: %d, Rejected: %d\n", successCount, failedRequests)
 }
